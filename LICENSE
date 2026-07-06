@@ -35,7 +35,7 @@ URL for them above, as well as copies of any plain-text lines
 beginning with `Required Notice:` that the licensor provided
 with the software.  For example:
 
-Required Notice: Copyright@2026 Duc Nguyen (workofduc@gmail.com)
+Required Notice: Copyright@2026, Nguyễn Anh Đức (workofduc@gmail.com)
 
 ## Changes and New Works License
 
@@ -133,9 +133,7 @@ of your licenses.
 -------------------------------------------------------------------------------
 ADDITIONAL TERMS AND CONTACT INFORMATION:
 
-1. COMMERCIAL USE: This license does not grant rights for commercial use. 
-   To obtain a commercial license, please contact the Licensor at:
-   workofduc@gmail.com
+1. COMMERCIAL USE: This license does not grant rights for commercial production use. However, the Licensor hereby grants an explicit, temporary 7-day exemption solely for internal commercial evaluation, compilation, and performance testing. To obtain a full production commercial license, please contact the Licensor directly at: workofduc@gmail.com
 
 2. ATTRIBUTION: Any redistribution of the compiled library or headers 
    (where permitted by the Licensor) must retain this license file.

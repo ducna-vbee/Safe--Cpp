@@ -79,8 +79,14 @@ If you find this runtime library useful for your research or hobby projects, con
 * **[Sponsor on GitHub](https://github.com/sponsors/duc18020319)**
 
 
-## ⚖️ License
-	This library project is licensed under the PolyForm Non-commercial License 1.0.0.
-	Non-commercial/Educational Use: Free.
-	Commercial Use: Prohibited without a separate commercial license.
-	Please contact workofduc@gmail.com for pricing and licensing terms.
+## ⚖️ Legal & Licensing Information
+
+Required Notice: Copyright©2026, Nguyễn Anh Đức (workofduc@gmail.com)
+
+This project is **Source-Available**. It is licensed under the **PolyForm Noncommercial License 1.0.0** with additional terms granting a temporary commercial evaluation period. All Rights Reserved.
+
+* **Non-Commercial Use:** Completely free for personal study, hobby projects, research, and non-commercial organizations.
+* **Commercial Evaluation:** Commercial entities are granted a temporary **7-day exemption** solely for internal evaluation, compilation, and performance testing.
+* **Commercial Production:** A paid commercial production license is required for any commercial application beyond the 7-day trial.
+
+For commercial licensing inquiries, please contact me via email: **workofduc@gmail.com**.

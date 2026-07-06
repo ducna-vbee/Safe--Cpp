@@ -262,13 +262,17 @@ The library is implemented to be thread-safe.
 
 ### Contribution
 
-	Duc Nguyen (Myself)
+	Duc Anh Nguyen (Myself)
 
 
 ### Legal & Licensing Information
 
-Required Notice: Copyright@2026 Duc Nguyen (workofduc@gmail.com) 
+Required Notice: Copyright©2026, Nguyễn Anh Đức (workofduc@gmail.com)
 
-This documentation and the associated software are licensed under the PolyForm Noncommercial License 1.0.0.
-* Permitted Use: Any noncommercial purpose, including personal research and hobby projects, is permitted.
-* Commercial Use: NOT permitted under these terms. For commercial licensing, please contact me via email: workofduc@gmail.com.
+This project is **Source-Available**. It is licensed under the **PolyForm Noncommercial License 1.0.0** with additional terms granting a temporary commercial evaluation period. All Rights Reserved.
+
+* **Non-Commercial Use:** Completely free for personal study, hobby projects, research, and non-commercial organizations.
+* **Commercial Evaluation:** Commercial entities are granted a temporary **7-day exemption** solely for internal evaluation, compilation, and performance testing.
+* **Commercial Production:** A paid commercial production license is required for any commercial application beyond the 7-day trial.
+
+For commercial licensing inquiries, please contact me via email: **workofduc@gmail.com**.
