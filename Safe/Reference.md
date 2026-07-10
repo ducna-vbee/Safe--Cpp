@@ -1445,9 +1445,9 @@ For detailed semantics, examples and usage patterns see [Guide](Guide.md).
 
 Required Notice: Copyright©2026, Nguyễn Anh Đức (workofduc@gmail.com)
 
-`Safe--Cpp` is dual-licensed to accommodate both open-source development and proprietary commercial use:
+`SafeCpp` is dual-licensed to accommodate both open-source development and proprietary commercial use:
 
 * **Open-Source Track (GPLv3):** This project is licensed under the **GNU General Public License v3**. It is 100% free and open for personal study, academic research, and open-source projects. In accordance with the GPLv3, any software that integrates this library under this track must also have its full source code made public.
-* **Commercial Track:** For commercial entities wishing to embed `Safe--Cpp` into proprietary, closed-source software, a separate commercial license is required. This grants you the legal right to use the library without being bound by the GPLv3 copyleft requirements.
+* **Commercial Track:** For commercial entities wishing to embed `SafeCpp` into proprietary, closed-source software, a separate commercial license is required. This grants you the legal right to use the library without being bound by the GPLv3 copyleft requirements.
 
 For commercial licensing inquiries, pricing, or to obtain a proprietary license agreement, please contact: workofduc@gmail.com.

@@ -26,8 +26,8 @@
 LANGUAGE LANG_NEUTRAL,SUBLANG_NEUTRAL
 
 VS_VERSION_INFO VERSIONINFO
-	FILEVERSION 2026,3,0,0
-	PRODUCTVERSION 2026,3,0,0
+	FILEVERSION 2026,4,0,0
+	PRODUCTVERSION 2026,4,0,0
 	FILEFLAGSMASK 0x3fL
 	FILEFLAGS 0x0L
 	FILEOS VOS_NT_WINDOWS32
@@ -40,9 +40,9 @@ BEGIN
 		BEGIN
 			VALUE "InternalName","Safe"
 			VALUE "ProductName","Safe"
-			VALUE "ProductVersion","2026.3.0.0"
+			VALUE "ProductVersion","2026.4.0.0"
 			VALUE "FileDescription","Safe"
-			VALUE "FileVersion","2026.3.0.0"
+			VALUE "FileVersion","2026.4.0.0"
 			VALUE "OriginalFilename","Safe.dll"
 			VALUE "LegalCopyright","Copyright@2026, Nguyen Anh Duc (workofduc@gmail.com)."
 		END

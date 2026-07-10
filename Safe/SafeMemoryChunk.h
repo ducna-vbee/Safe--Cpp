@@ -20,6 +20,7 @@
 #pragma once
 
 /** Inclusion(s) of C++ standard library header file(s).**/
+#include <concepts>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -47,6 +48,18 @@ namespace Safe
 		std::size_t cardinality;
 		std::vector<const void*> constantPointerMasks;
 		std::vector<void*> variablePointerMasks;
+
+
+		/// <summary>
+		///		static
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="cardinality"></param>
+		/// <returns>void</returns>
+		[[noreturn]] static inline void throwOutOfBoundException(const std::size_t& index,const std::size_t& cardinality) noexcept(false)
+		{
+			throw SafeContextException("Argument `index` is out of bound: `" + std::to_string(index) + "` while the cardinality is `" + std::to_string(cardinality) + "`!");
+		};
 
 	public:
 		static_assert((std::is_base_of<SafeContextBase,GenericTypeOfSafeContextDerivative>::value == true),"`GenericTypeOfSafeContextDerivative` must be a type inherited from `SafeContextBase`!");
@@ -174,7 +187,7 @@ namespace Safe
 		{
 			if (index >= this->cardinality)
 			{
-				throw SafeContextException("Argument `index` is out of bound: `" + std::to_string(index) + "` while the cardinality is `" + std::to_string(this->cardinality) + "`!");
+				SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwOutOfBoundException(index,this->cardinality);
 			}
 			else
 			{
@@ -194,7 +207,7 @@ namespace Safe
 		{
 			if (index >= this->cardinality)
 			{
-				throw SafeContextException("Argument `index` is out of bound: `" + std::to_string(index) + "` while the cardinality is `" + std::to_string(this->cardinality) + "`!");
+				SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwOutOfBoundException(index,this->cardinality);
 			}
 			else
 			{

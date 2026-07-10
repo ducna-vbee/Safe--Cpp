@@ -20,6 +20,7 @@
 #pragma once
 
 /** Inclusion(s) of C++ standard library header file(s).**/
+#include <concepts>
 #include <type_traits>
 #include <typeinfo>
 #include <vector>
@@ -50,6 +51,7 @@ namespace Safe
 		/// <summary>
 		///		C++ functional pointer type: `SafeConstructionInvoker`.
 		/// </summary>
+		/// <returns>void</returns>
 		typedef void (*SafeConstructionInvoker)(SafeContextBase* const);
 
 
