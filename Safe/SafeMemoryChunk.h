@@ -52,6 +52,7 @@ namespace Safe
 
 		/// <summary>
 		///		static
+		///		inline
 		/// </summary>
 		/// <param name="index"></param>
 		/// <param name="cardinality"></param>
@@ -59,6 +60,17 @@ namespace Safe
 		[[noreturn]] static inline void throwOutOfBoundException(const std::size_t& index,const std::size_t& cardinality) noexcept(false)
 		{
 			throw SafeContextException("Argument `index` is out of bound: `" + std::to_string(index) + "` while the cardinality is `" + std::to_string(cardinality) + "`!");
+		};
+
+		/// <summary>
+		///		static
+		///		inline
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns>void</returns>
+		[[noreturn]] static inline void throwAccessViolationException(const std::size_t& index) noexcept(false)
+		{
+			throw SafeContextException("Can't access the chunk element at index " + std::to_string(index) + " because the chunk has been recycled!");
 		};
 
 	public:
@@ -74,7 +86,7 @@ namespace Safe
 		/// <summary>
 		///		Constructor of `SafeMemoryChunk`.
 		/// </summary>
-		inline constexpr explicit SafeMemoryChunk() : SafeContextBase()
+		inline explicit SafeMemoryChunk() : SafeContextBase()
 		{
 			this->cardinality = 10;
 			this->constantPointerMasks = std::vector<const void*>();
@@ -93,7 +105,7 @@ namespace Safe
 			this->composedBufferPointer = chunkPointer;
 			SafeContextBase::helpInitializeChunk(chunkBufferElementPointers,this->cardinality,this->constantPointerMasks,this->variablePointerMasks,[](SafeContextBase* const instancePointer) -> void
 			{
-				::new(instancePointer) GenericTypeOfSafeContextDerivative();
+				::new (instancePointer) GenericTypeOfSafeContextDerivative();
 			});
 		};
 
@@ -120,22 +132,85 @@ namespace Safe
 			this->composedBufferPointer = chunkPointer;
 			SafeContextBase::helpInitializeChunk(chunkBufferElementPointers,this->cardinality,this->constantPointerMasks,this->variablePointerMasks,[](SafeContextBase* const instancePointer) -> void
 			{
-				::new(instancePointer) GenericTypeOfSafeContextDerivative();
+				::new (instancePointer) GenericTypeOfSafeContextDerivative();
 			});
 		};
 
-	private:
 		/// <summary>
 		///		Copy constructor of `SafeMemoryChunk`.
 		/// </summary>
-		inline SafeMemoryChunk(const SafeMemoryChunk<GenericTypeOfSafeContextDerivative>&) = delete;
+		/// <param name="other"></param>
+		inline SafeMemoryChunk(const SafeMemoryChunk<GenericTypeOfSafeContextDerivative>& other) : SafeContextBase(static_cast<const SafeContextBase&>(other))
+		{
+			if (other.cardinality > 0)
+			{
+				this->cardinality = other.cardinality;
+			}
+			else
+			{
+				this->cardinality = 10;
+			}
+
+			this->constantPointerMasks = std::vector<const void*>();
+			this->variablePointerMasks = std::vector<void*>();
+			std::vector<SafeContextBase*> chunkBufferElementPointers = std::vector<SafeContextBase*>();
+			GenericTypeOfSafeContextDerivative* chunkPointer = static_cast<GenericTypeOfSafeContextDerivative*>(::operator new(sizeof(GenericTypeOfSafeContextDerivative) * this->cardinality));
+			std::size_t i = 0;
+
+			for (i = 0;i < this->cardinality;i++)
+			{
+				(this->constantPointerMasks).push_back(static_cast<const void*>(chunkPointer + i));
+				(this->variablePointerMasks).push_back(static_cast<void*>(chunkPointer + i));
+				chunkBufferElementPointers.push_back(static_cast<SafeContextBase*>(chunkPointer + i));
+			}
+
+			this->composedBufferPointer = chunkPointer;
+			
+			if (other.composedBufferPointer == nullptr)
+			{
+				SafeContextBase::helpInitializeChunk(chunkBufferElementPointers,this->cardinality,this->constantPointerMasks,this->variablePointerMasks,[](SafeContextBase* const instancePointer) -> void
+				{
+					::new (instancePointer) GenericTypeOfSafeContextDerivative();
+				});
+			}
+			else
+			{
+				std::vector<SafeContextBase*> otherElementPointers = std::vector<SafeContextBase*>();
+
+				for (i = 0;i < other.cardinality;i++)
+				{
+					otherElementPointers.push_back(static_cast<SafeContextBase*>((other.composedBufferPointer)[i]));
+				}
+
+				SafeContextBase::helpDuplicateChunk(chunkBufferElementPointers,otherElementPointers,this->cardinality,this->constantPointerMasks,this->variablePointerMasks,[](SafeContextBase* const instancePointer,const SafeContextBase* const otherInstancePointer) -> void
+				{
+					::new (instancePointer) GenericTypeOfSafeContextDerivative(*(static_cast<const GenericTypeOfSafeContextDerivative* const>(otherInstancePointer)));
+				});
+			}
+		};
 
 		/// <summary>
 		///		Move constructor of `SafeMemoryChunk`.
 		/// </summary>
-		inline SafeMemoryChunk(SafeMemoryChunk<GenericTypeOfSafeContextDerivative>&&) = delete;
+		/// <param name="other"></param>
+		inline SafeMemoryChunk(SafeMemoryChunk<GenericTypeOfSafeContextDerivative>&& other) noexcept(false) : SafeContextBase(static_cast<SafeContextBase&&>(other))
+		{
+			this->cardinality = static_cast<std::size_t&&>(other.cardinality);
+			this->constantPointerMasks = std::vector<const void*>();
+			this->variablePointerMasks = std::vector<void*>();
+			this->composedBufferPointer = static_cast<GenericTypeOfSafeContextDerivative*&&>(other.composedBufferPointer);
+			other.composedBufferPointer = nullptr;
+			std::size_t i = 0;
 
-	public:
+			for (i = 0;i < this->cardinality;i++)
+			{
+				(this->constantPointerMasks).push_back((other.constantPointerMasks)[i]);
+				(this->variablePointerMasks).push_back((other.variablePointerMasks)[i]);
+				(other.constantPointerMasks)[i] = nullptr;
+				(other.variablePointerMasks)[i] = nullptr;
+			}
+		};
+
 		/// <summary>
 		///		Destructor of `SafeMemoryChunk`.
 		/// </summary>
@@ -157,24 +232,24 @@ namespace Safe
 			}
 		};
 
-	private:
 		/// <summary>
 		///		dynamic
 		///		inline
 		///		operator=
 		/// </summary>
+		/// <param name="other"></param>
 		/// <returns>SafeMemoryChunk&lt;GenericTypeOfSafeContextDerivative&gt;&amp;</returns>
-		inline SafeMemoryChunk<GenericTypeOfSafeContextDerivative>& operator=(const SafeMemoryChunk<GenericTypeOfSafeContextDerivative>&) = delete;
+		inline SafeMemoryChunk<GenericTypeOfSafeContextDerivative>& operator=(const SafeMemoryChunk<GenericTypeOfSafeContextDerivative>& other) = delete;
 
 		/// <summary>
 		///		dynamic
 		///		inline
 		///		operator=
 		/// </summary>
+		/// <param name="other"></param>
 		/// <returns>SafeMemoryChunk&lt;GenericTypeOfSafeContextDerivative&gt;&amp;</returns>
 		inline SafeMemoryChunk<GenericTypeOfSafeContextDerivative>& operator=(SafeMemoryChunk<GenericTypeOfSafeContextDerivative>&&) = delete;
 
-	public:
 		/// <summary>
 		///		dynamic
 		///		inline
@@ -182,7 +257,6 @@ namespace Safe
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns>GenericTypeOfSafeContextDerivative&amp;</returns>
-		/// <exception cref="SafeContextException"/>
 		inline const GenericTypeOfSafeContextDerivative& operator[](const std::size_t& index) const
 		{
 			if (index >= this->cardinality)
@@ -191,7 +265,14 @@ namespace Safe
 			}
 			else
 			{
-				return *(static_cast<const GenericTypeOfSafeContextDerivative*>((this->constantPointerMasks)[index]));
+				if ((this->constantPointerMasks)[index] == nullptr)
+				{
+					SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwAccessViolationException(index);
+				}
+				else
+				{
+					return *(static_cast<const GenericTypeOfSafeContextDerivative*>((this->constantPointerMasks)[index]));
+				}
 			}
 		};
 
@@ -202,7 +283,6 @@ namespace Safe
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns>GenericTypeOfSafeContextDerivative&amp;</returns>
-		/// <exception cref="SafeContextException"/>
 		inline GenericTypeOfSafeContextDerivative& operator[](const std::size_t& index)
 		{
 			if (index >= this->cardinality)
@@ -211,7 +291,14 @@ namespace Safe
 			}
 			else
 			{
-				return *(static_cast<GenericTypeOfSafeContextDerivative*>((this->variablePointerMasks)[index]));
+				if ((this->variablePointerMasks)[index] == nullptr)
+				{
+					SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwAccessViolationException(index);
+				}
+				else
+				{
+					return *(static_cast<GenericTypeOfSafeContextDerivative*>((this->variablePointerMasks)[index]));
+				}
 			}
 		};
 

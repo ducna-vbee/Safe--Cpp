@@ -426,6 +426,22 @@ public:
 
 Overloads of `operator[]`, the indexer operators. They refer to the element instance(s) of type `GenericTypeOfSafeContextDerivative` in the current chunk by index provided by arguments `index`.
 
+- `throwOutOfBoundException(const std::size_t& index,const std::size_t& cardinality) noexcept(false)`
+```c++
+public:
+	[[noreturn]] static inline void throwOutOfBoundException(const std::size_t& index,const std::size_t& cardinality) noexcept(false);
+```
+
+This privatized method throws an exception related to out-of-bound errors and doesn't return.
+
+- `throwAccessViolationException(const std::size_t& index) noexcept(false)`
+```c++
+public:
+	[[noreturn]] static inline void throwAccessViolationException(const std::size_t& index) noexcept(false)
+```
+
+This privatized method throws an exception related to access violation errors and doesn't return.
+
 - `getCardinality()`
 ```c++
 public:

@@ -49,10 +49,19 @@ namespace Safe
 		class SafeMemoryManager;
 
 		/// <summary>
-		///		C++ functional pointer type: `SafeConstructionInvoker`.
+		///		C++ functional pointer type: `DefaultConstructionInvoker`.
 		/// </summary>
+		/// <param name="instancePointer"></param>
 		/// <returns>void</returns>
-		typedef void (*SafeConstructionInvoker)(SafeContextBase* const);
+		typedef void (*DefaultConstructionInvoker)(SafeContextBase* const instancePointer);
+
+		/// <summary>
+		///		C++ functional pointer type: `CopyConstructionInvoker`.
+		/// </summary>
+		/// <param name="instancePointer"></param>
+		/// <param name="otherInstancePointer"></param>
+		/// <returns>void</returns>
+		typedef void (*CopyConstructionInvoker)(SafeContextBase* const instancePointer,const SafeContextBase* const otherInstancePointer);
 
 
 		bool life;
@@ -248,7 +257,7 @@ namespace Safe
 		/// <param name="instancePointer"></param>
 		/// <param name="constructionInvoker"></param>
 		/// <returns>void</returns>
-		static void reconstructSafely(SafeContextBase* const instancePointer,const SafeConstructionInvoker& constructionInvoker);
+		static void reconstructSafely(SafeContextBase* const instancePointer,const DefaultConstructionInvoker& constructionInvoker);
 
 		/// <summary>
 		///		static
@@ -259,7 +268,19 @@ namespace Safe
 		/// <param name="variablePointerMasks"></param>
 		/// <param name="constructionInvoker"></param>
 		/// <returns>void</returns>
-		static void helpInitializeChunk(std::vector<SafeContextBase*>& chunkBufferElementPointers,const std::size_t& cardinality,const std::vector<const void*>& constantPointerMasks,const std::vector<void*>& variablePointerMasks,const SafeConstructionInvoker& constructionInvoker);
+		static void helpInitializeChunk(std::vector<SafeContextBase*>& chunkBufferElementPointers,const std::size_t& cardinality,const std::vector<const void*>& constantPointerMasks,const std::vector<void*>& variablePointerMasks,const DefaultConstructionInvoker& constructionInvoker);
+
+		/// <summary>
+		///		static
+		/// </summary>
+		/// <param name="chunkBufferElementPointers"></param>
+		/// <param name="sourceElementPointers"></param>
+		/// <param name="cardinality"></param>
+		/// <param name="constantPointerMasks"></param>
+		/// <param name="variablePointerMasks"></param>
+		/// <param name="constructionInvoker"></param>
+		/// <returns>void</returns>
+		static void helpDuplicateChunk(std::vector<SafeContextBase*>& chunkBufferElementPointers,const std::vector<SafeContextBase*>& sourceElementPointers,const std::size_t& cardinality,const std::vector<const void*>& constantPointerMasks,const std::vector<void*>& variablePointerMasks,const CopyConstructionInvoker& constructionInvoker);
 
 		/// <summary>
 		///		static
@@ -331,7 +352,7 @@ namespace Safe
 			{
 				SafeContextBase::reconstructSafely(recycledPointer,[](SafeContextBase* const instancePointer) -> void
 				{
-					::new(instancePointer) GenericTypeOfSafeContextDerivative();
+					::new (instancePointer) GenericTypeOfSafeContextDerivative();
 				});
 
 				return *recycledPointer;

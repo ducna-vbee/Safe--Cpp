@@ -114,7 +114,19 @@ namespace Safe
 		/// <param name="variablePointerMasks"></param>
 		/// <param name="constructionInvoker"></param>
 		/// <returns>void</returns>
-		static void helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const SafeConstructionInvoker& constructionInvoker);
+		static void helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const DefaultConstructionInvoker& constructionInvoker);
+
+		/// <summary>
+		///		static
+		/// </summary>
+		/// <param name="chunkBufferElementPointers"></param>
+		/// <param name="sourceElementPointers"></param>
+		/// <param name="cardinality"></param>
+		/// <param name="constantPointerMasks"></param>
+		/// <param name="variablePointerMasks"></param>
+		/// <param name="constructionInvoker"></param>
+		/// <returns>void</returns>
+		static void helpDuplicateChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const vector<SafeContextBase*>& sourceElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const CopyConstructionInvoker& constructionInvoker);
 
 		/// <summary>
 		///		static
@@ -144,7 +156,7 @@ namespace Safe
 		/// <param name="instancePointer"></param>
 		/// <param name="constructionInvoker"></param>
 		/// <returns>void</returns>
-		static void reconstructSafely(SafeContextBase* const instancePointer,const SafeConstructionInvoker& constructionInvoker);
+		static void reconstructSafely(SafeContextBase* const instancePointer,const DefaultConstructionInvoker& constructionInvoker);
 
 		/// <summary>
 		///		dynamic
@@ -408,7 +420,7 @@ namespace Safe
 		SafeMemoryManager::Classification.store(classification);
 	};
 
-	void SafeContextBase::SafeMemoryManager::helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const SafeConstructionInvoker& constructionInvoker)
+	void SafeContextBase::SafeMemoryManager::helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const DefaultConstructionInvoker& constructionInvoker)
 	{
 		lock_guard<recursive_mutex> classificationLock(ClassificationGuard);
 		SafeMemoryManager::Classification.store(false);
@@ -417,6 +429,20 @@ namespace Safe
 		for (i = 0;i < cardinality;i++)
 		{
 			constructionInvoker(chunkBufferElementPointers[i]);
+		}
+
+		SafeMemoryManager::Classification.store(true);
+	};
+
+	void SafeContextBase::SafeMemoryManager::helpDuplicateChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const vector<SafeContextBase*>& sourceElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const CopyConstructionInvoker& constructionInvoker)
+	{
+		lock_guard<recursive_mutex> classificationLock(ClassificationGuard);
+		SafeMemoryManager::Classification.store(false);
+		size_t i = 0;
+
+		for (i = 0;i < cardinality;i++)
+		{
+			constructionInvoker(chunkBufferElementPointers[i],sourceElementPointers[i]);
 		}
 
 		SafeMemoryManager::Classification.store(true);
@@ -451,7 +477,7 @@ namespace Safe
 		SafeMemoryManager::Classification.store(true);
 	};
 
-	void SafeContextBase::SafeMemoryManager::reconstructSafely(SafeContextBase* const instancePointer,const SafeConstructionInvoker& constructionInvoker)
+	void SafeContextBase::SafeMemoryManager::reconstructSafely(SafeContextBase* const instancePointer,const DefaultConstructionInvoker& constructionInvoker)
 	{
 		lock_guard<recursive_mutex> classificationLock(ClassificationGuard);
 		SafeMemoryManager::Classification.store(false);
@@ -812,14 +838,19 @@ namespace Safe
 		SafeMemoryManager::StaticMemoryManager.supplementDefaultPolymorphicInstance(defaultedInstancePointer);
 	};
 
-	void SafeContextBase::reconstructSafely(SafeContextBase* const instancePointer,const SafeConstructionInvoker& constructionInvoker)
+	void SafeContextBase::reconstructSafely(SafeContextBase* const instancePointer,const DefaultConstructionInvoker& constructionInvoker)
 	{
 		SafeMemoryManager::reconstructSafely(instancePointer,constructionInvoker);
 	};
 
-	void SafeContextBase::helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const SafeConstructionInvoker& constructionInvoker)
+	void SafeContextBase::helpInitializeChunk(vector<SafeContextBase*>& chunkBufferElementPointers,const size_t& cardinality,const vector<const void*>& constantPointerMasks,const vector<void*>& variablePointerMasks,const DefaultConstructionInvoker& constructionInvoker)
 	{
 		SafeMemoryManager::helpInitializeChunk(chunkBufferElementPointers,cardinality,constantPointerMasks,variablePointerMasks,constructionInvoker);
+	};
+
+	void SafeContextBase::helpDuplicateChunk(std::vector<SafeContextBase*>& chunkBufferElementPointers,const std::vector<SafeContextBase*>& sourceElementPointers,const std::size_t& cardinality,const std::vector<const void*>& constantPointerMasks,const std::vector<void*>& variablePointerMasks,const CopyConstructionInvoker& constructionInvoker)
+	{
+		SafeMemoryManager::helpDuplicateChunk(chunkBufferElementPointers,sourceElementPointers,cardinality,constantPointerMasks,variablePointerMasks,constructionInvoker);
 	};
 
 	void SafeContextBase::destroyDerivedChunkOnMemoryHeap(const std::vector<SafeContextBase*>& chunkBufferElementPointers,const std::size_t& cardinality,std::vector<const void*>& constantPointerMasks,std::vector<void*>& variablePointerMasks)

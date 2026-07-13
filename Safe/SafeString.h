@@ -83,7 +83,7 @@ namespace Safe
 			///		Move constructor of `SafeStringBuilder`.
 			/// </summary>
 			/// <param name="other"></param>
-			SafeStringBuilder(SafeStringBuilder&& other) noexcept;
+			SafeStringBuilder(SafeStringBuilder&& other) noexcept(false);
 
 			/// <summary>
 			///		Destructor of `SafeStringBuilder`.
@@ -100,12 +100,11 @@ namespace Safe
 
 			/// <summary>
 			///		dynamic
-			///		noexcept
 			///		operator=
 			/// </summary>
 			/// <param name="other"></param>
 			/// <returns>SafeStringBuilder&amp;</returns>
-			SafeStringBuilder& operator=(SafeStringBuilder&& other) noexcept;
+			SafeStringBuilder& operator=(SafeStringBuilder&& other) noexcept(false);
 
 			/// <summary>
 			///		dynamic
@@ -290,7 +289,7 @@ namespace Safe
 		///		Move constructor of `SafeString`.
 		/// </summary>
 		/// <param name="other"></param>
-		SafeString(SafeString<GenericTypeOfCharacter>&& other) noexcept;
+		SafeString(SafeString<GenericTypeOfCharacter>&& other) noexcept(false);
 
 		/// <summary>
 		///		Destructor of `SafeString`.
@@ -307,12 +306,11 @@ namespace Safe
 
 		/// <summary>
 		///		dynamic
-		///		noexcept
 		///		operator=
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns>SafeString&lt;GenericTypeOfCharacter&gt;&amp;</returns>
-		SafeString<GenericTypeOfCharacter>& operator=(SafeString<GenericTypeOfCharacter>&& other) noexcept;
+		SafeString<GenericTypeOfCharacter>& operator=(SafeString<GenericTypeOfCharacter>&& other) noexcept(false);
 
 		/// <summary>
 		///		dynamic
