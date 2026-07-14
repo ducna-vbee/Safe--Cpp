@@ -31,6 +31,7 @@
 
 /** Inclusion(s) of project's C++ header file(s).**/
 #include "SafeContextBase.h"
+#include "SafeContextException.h"
 #include "SafeEvent.h"
 #include "SafeMemoryChunk.h"
 #include "SafeNamespace.h"
@@ -127,7 +128,7 @@ public:
 		for (i = 0;i < cardinality;i++)
 		{
 			//::new (&(chunkPointer[i])) Example(); //Impossible.
-			::new (chunkPointer + i) Example(); //Definitely crashes the program in the end.
+			//::new (chunkPointer + i) Example(); //Definitely crashes the program in the end.
 		}
 
 		return chunkPointer;
@@ -168,27 +169,8 @@ int main()
 	_CrtSetReportMode(_CRT_WARN,_CRTDBG_MODE_DEBUG);
 #endif
 
-	Example* chunkPointer = static_cast<Example*>(::operator new(sizeof(Example) * 100));
+	Example* chunkPointer = ::new Example();
 	::delete chunkPointer; // Compilation error if compiled using Visual C++.
-	//::delete static_cast<void*>(chunkPointer); //Unsafe, not good for any pointer that is managed.
-
-	return 0;
-};*/
-
-/*#ifdef WINDOWS_VISUAL_CPP
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-int main()
-{
-#ifdef WINDOWS_VISUAL_CPP
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetReportMode(_CRT_WARN,_CRTDBG_MODE_DEBUG);
-#endif
-
-	Example* arrayPointer = static_cast<Example*>(::operator new[](sizeof(Example) * 100));
-	::delete[] arrayPointer; // Compilation error if compiled using Visual C++.
-	//::delete[] static_cast<void*>(arrayPointer); //Unsafe, not good for any pointer that is managed.
 
 	return 0;
 };*/
@@ -209,6 +191,19 @@ int main()
 	Safe::SafeMemoryChunk<Example>& repurposedChunkReference = Safe::SafeContextBase::repurpose<Safe::SafeMemoryChunk<Example>>();
 	cout << repurposedChunkReference.getCardinality() << endl;
 
+	try
+	{
+		//Safe::SafeContextBase::recycle(static_cast<Safe::SafeContextBase&>((*chunkPointer)[0])); //Impossible.
+		chunkPointer->mutate(0,[](Example* const instancePointer) -> void
+		{
+			Safe::SafeContextBase::recycle(static_cast<Safe::SafeContextBase*>(instancePointer));
+		});
+	}
+	catch (const Safe::SafeContextException& exception)
+	{
+		cout << exception.getMessage() << endl;
+	}
+
 	return 0;
 };*/
 
@@ -227,9 +222,9 @@ int main()
 	(chunkReference[9]).setID(100);
 	cout << (chunkReference[9]).getID() << endl;
 	chunkReference.dispose();
-	Example& reference = chunkReference[9]; //Still valid.
+	Example& reference = chunkReference[9]; //Invalid, prevented dangling reference.
 	cout << reference.getID() << endl;
-	const Example& constantReference = chunkReference[9]; //Still valid.
+	const Example& constantReference = chunkReference[9]; //Valid due to lifetime extensions, prevented dangling reference.
 
 	return 0;
 };*/

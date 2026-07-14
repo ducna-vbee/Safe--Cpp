@@ -325,13 +325,13 @@ namespace Safe
 			{
 				SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwOutOfBoundException(index,this->cardinality);
 			}
-			else if ((this->composedBufferPointer == nullptr) || ((this->composedBufferPointer)[index] == nullptr))
+			else if ((this->composedBufferPointer == nullptr) || (&((this->composedBufferPointer)[index]) == nullptr))
 			{
 				SafeMemoryChunk<GenericTypeOfSafeContextDerivative>::throwAccessViolationException(index);
 			}
 			else
 			{
-				mutator(&((this->composedBufferPointer)[index]));
+				mutator(static_cast<GenericTypeOfSafeContextDerivative*>(&((this->composedBufferPointer)[index])));
 			}
 		};
 

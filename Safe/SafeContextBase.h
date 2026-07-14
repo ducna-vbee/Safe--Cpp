@@ -226,34 +226,6 @@ namespace Safe
 		/// <summary>
 		///		static
 		/// </summary>
-		/// <param name="typeInformation"></param>
-		/// <returns>SafeContextBase*</returns>
-		static const SafeContextBase* referToDefaultConstantInstance(const std::type_info& typeInformation);
-
-		/// <summary>
-		///		static
-		/// </summary>
-		/// <param name="defaultedInstancePointer"></param>
-		/// <returns>void</returns>
-		static void supplementDefaultPolymorphicInstance(const SafeContextBase* defaultedInstancePointer);
-
-		/// <summary>
-		///		static
-		///		inline
-		/// </summary>
-		/// <typeparam name="GenericTypeOfSafeContextDerivative"></typeparam>
-		/// <returns>GenericTypeOfSafeContextDerivative*</returns>
-		template<typename GenericTypeOfSafeContextDerivative> static inline GenericTypeOfSafeContextDerivative* supplementDefaultInstanceOfDerivedType()
-		{
-			GenericTypeOfSafeContextDerivative* defaultInstancePointer = ::new GenericTypeOfSafeContextDerivative();
-			SafeContextBase::supplementDefaultPolymorphicInstance(defaultInstancePointer);
-
-			return defaultInstancePointer;
-		};
-
-		/// <summary>
-		///		static
-		/// </summary>
 		/// <param name="instancePointer"></param>
 		/// <param name="constructionInvoker"></param>
 		/// <returns>void</returns>

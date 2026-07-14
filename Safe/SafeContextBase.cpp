@@ -19,8 +19,10 @@
 
 /** Inclusion(s) of C++ standard library header file(s).**/
 #include <atomic>
+#include <cstdarg>
 #include <deque>
 #include <mutex>
+#include <string>
 #include <typeinfo>
 #include <utility>
 #include <vector>
@@ -65,9 +67,6 @@ namespace Safe
 
 	public:
 		static SafeMemoryManager StaticMemoryManager;
-
-
-		vector<const SafeContextBase*> defaultConstantInstancePointers;
 
 
 		/// <summary>
@@ -204,6 +203,7 @@ namespace Safe
 		/// </summary>
 		/// <param name="instancePointer"></param>
 		/// <returns>void</returns>
+		/// <exception cref="SafeContextException"/>
 		void recycle(SafeContextBase* const instancePointer);
 
 		/// <summary>
@@ -212,20 +212,6 @@ namespace Safe
 		/// <param name="typeInformation"></param>
 		/// <returns>SafeContextBase*</returns>
 		SafeContextBase* upcycle(const type_info& typeInformation);
-
-		/// <summary>
-		///		dynamic
-		/// </summary>
-		/// <param name="typeInformation"></param>
-		/// <returns>SafeContextBase*</returns>
-		const SafeContextBase* referToDefaultConstantInstance(const type_info& typeInformation);
-
-		/// <summary>
-		///		dynamic
-		/// </summary>
-		/// <param name="defaultedInstancePointer"></param>
-		/// <returns>void</returns>
-		void supplementDefaultPolymorphicInstance(const SafeContextBase* defaultedInstancePointer);
 
 		/// <summary>
 		///		dynamic
@@ -241,7 +227,6 @@ namespace Safe
 		this->trackedArrayPointerMetadataQueue = deque<pair<SafeContextBase*,size_t>>();
 		this->trackedChunkPointerMetadataQueue = deque<pair<SafeContextBase*,size_t>>();
 		this->recycledInstancePointers = vector<SafeContextBase*>();
-		this->defaultConstantInstancePointers = vector<const SafeContextBase*>();
 	};
 	SafeContextBase::SafeMemoryManager::~SafeMemoryManager() noexcept
 	{
@@ -562,14 +547,30 @@ namespace Safe
 
 	void SafeContextBase::SafeMemoryManager::recycle(SafeContextBase& instanceReference)
 	{
-		lock_guard<mutex> recyclerLock(this->memoryRecyclerSynchronizationGuard);
-		(this->recycledInstancePointers).push_back(&instanceReference);
+		this->recycle(&instanceReference);
 	};
 
 	void SafeContextBase::SafeMemoryManager::recycle(SafeContextBase* const instancePointer)
 	{
 		lock_guard<mutex> recyclerLock(this->memoryRecyclerSynchronizationGuard);
-		(this->recycledInstancePointers).push_back(instancePointer);
+		bool existence = false;
+		size_t i = 0;
+		size_t numberOfTrackedInstances = (this->trackedInstancePointerQueue).size();
+
+		for (i = 0;i < numberOfTrackedInstances;i++)
+		{
+			if (instancePointer == (this->trackedInstancePointerQueue)[i])
+			{
+				existence = true;
+				(this->recycledInstancePointers).push_back(instancePointer);
+				break;
+			}
+		}
+
+		if (existence == false)
+		{
+			throw SafeContextException("The argument `instancePointer` is a pointer that doesn't hold a valid memory address of an managed instance: `" + to_string(reinterpret_cast<uintptr_t>(instancePointer)) + "`! It could be a memory address of an element of the memory chunk type `SafeMemoryChunk`.");
+		}
 	};
 
 	SafeContextBase* SafeContextBase::SafeMemoryManager::upcycle(const type_info& typeInformation)
@@ -590,31 +591,6 @@ namespace Safe
 		}
 
 		return result;
-	};
-
-	const SafeContextBase* SafeContextBase::SafeMemoryManager::referToDefaultConstantInstance(const type_info& typeInformation)
-	{
-		lock_guard<mutex> recyclerLock(this->memoryRecyclerSynchronizationGuard);
-		size_t i = 0;
-		size_t numberOfDefaultConstantInstances = (this->defaultConstantInstancePointers).size();
-		const SafeContextBase* result = nullptr;
-
-		for (i = 0;i < numberOfDefaultConstantInstances;i++)
-		{
-			if (((this->defaultConstantInstancePointers)[i])->getTypeInfo() == typeInformation)
-			{
-				result = (this->defaultConstantInstancePointers)[i];
-				break;
-			}
-		}
-
-		return result;
-	};
-
-	void SafeContextBase::SafeMemoryManager::supplementDefaultPolymorphicInstance(const SafeContextBase* defaultedInstancePointer)
-	{
-		lock_guard<mutex> recyclerLock(this->memoryRecyclerSynchronizationGuard);
-		(this->defaultConstantInstancePointers).push_back(defaultedInstancePointer);
 	};
 
 	void SafeContextBase::SafeMemoryManager::forceShutdown(const SafeContextBase* pointerInDangerZone)
@@ -812,16 +788,6 @@ namespace Safe
 		SafeMemoryManager::StaticMemoryManager.displaceChunk(chunkPointer);
 		::delete chunkPointer;
 		SafeMemoryManager::setClassification(true);
-	};
-
-	const SafeContextBase* SafeContextBase::referToDefaultConstantInstance(const type_info& typeInformation)
-	{
-		return SafeMemoryManager::StaticMemoryManager.referToDefaultConstantInstance(typeInformation);
-	};
-
-	void SafeContextBase::supplementDefaultPolymorphicInstance(const SafeContextBase* defaultedInstancePointer)
-	{
-		SafeMemoryManager::StaticMemoryManager.supplementDefaultPolymorphicInstance(defaultedInstancePointer);
 	};
 
 	void SafeContextBase::reconstructSafely(SafeContextBase* const instancePointer,const DefaultConstructionInvoker& constructionInvoker)

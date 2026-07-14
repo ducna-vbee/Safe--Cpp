@@ -26,14 +26,14 @@ It's straightforward to use the `Safe` library. Below are short examples that de
 class Example : public Safe::SafeContextBase //or `class Example safe`
 {
 private:
-	unsigned long long int id;
+	size_t id;
 
 public:
 	Example()
 	{
 		this->id = 0;
 	};
-	Example(const unsigned long long int& id)
+	Example(const size_t& id)
 	{
 		this->id = id;
 	};
@@ -70,17 +70,17 @@ public:
 		return *localInstancePointer;
 	};
 
-	unsigned long long int getID() const noexcept
+	size_t getID() const noexcept
 	{
 		return this->id;
 	};
 
-	void setID(const unsigned long long int& id) noexcept
+	void setID(const size_t& id) noexcept
 	{
 		this->id = id;
 	};
 
-	void setID(unsigned long long int&& id) noexcept
+	void setID(size_t&& id) noexcept
 	{
 		this->id = std::move(id);
 	};
@@ -110,7 +110,7 @@ int main()
 	Example* pointer = ::new Example();
 	Example* anotherPointer = ::new Example();
 	Example* pointerAlias = pointer;
-	Safe::SafeContextBase::recycle(dynamic_cast<Safe::SafeContextBase*>(pointer)); // `pointer` is no longer meaningful after recycling.
+	Safe::SafeContextBase::recycle(static_cast<Safe::SafeContextBase*>(pointer)); // `pointer` is no longer meaningful after recycling.
 	Example& repurposedReference = Safe::SafeContextBase::repurpose<Example>();
 
 	return 0;
@@ -125,15 +125,18 @@ int main()
 int main()
 {
 	Safe::SafeContextBase::SafeMemoryChunk<Example>& chunkReference = Safe::SafeContextBase::createDerivedChunkOnMemoryHeap<Example>(10);
+	(chunkReference[9]).setID(100);
+	cout << (chunkReference[9]).getID() << endl;
 	chunkReference.dispose();
-	Example& reference = chunkReference[9]; // Still valid (proxy).
-	const Example& constantReference = chunkReference[9]; // Still valid (proxy).
+	Example& reference = chunkReference[9]; //Invalid, prevented dangling reference.
+	cout << reference.getID() << endl;
+	const Example& constantReference = chunkReference[9]; //Valid due to lifetime extensions, prevented dangling reference.
 
 	return 0;
 };
 ```
 
-4) Access a random instance in another outer
+4) Access a random instance referred by a reference in another outer scope
 
 	The below example shows that `reference` is always valid as the instance it refers to is allocated on memory heap.
 
@@ -228,12 +231,13 @@ int main()
 
 - There are several limitations of `Safe` that originate from language constraints of C++. These limitations are considered "unsafe" in a similar sense to unsafe contexts in languages like C# or Rust.
 - The first one is, if a type that inherits from `SafeContextBase` and also manages resource types that don't inherit `SafeContextBase`, then those resources are deemed "unmanaged" and must be managed manually (that is, in the type's destructor), just like in C#'s destructors and its `IDisposable` interface.
+- Pointer arithmetic is considered unsafe.
 - If a polymorphic instance of `SafeContextBase` is allocated on memory stack, unlike the default allocation on memory heap, it shouldn't be used with reference(s) and pointer(s) as the reference(s) and the pointer(s) can potentially exist longer than the instance, and this leads to undefined behaviors. Pointer(s) and especially reference(s) in C++ behave as alias and it doesn't have any mechanism to stop them from referencing deallocated instances on memory stack. Always use reference(s) and pointer(s) with instance(s) allocated on heap-based memory, and use instance(s) allocated on stack-based memory as value type(s).
-- Constructors for types derived from `SafeContextBase` should be invoked using the global `new` (i.e. `::new`), not placement `new`. Manual arena allocations with placement new will likely cause crashes because the library manages and frees underlying buffers differently. This is unsafe and leads to undefined behaviors.
+- Constructors for types derived from `SafeContextBase` must be invoked using the global `new` (i.e. `::new`), not placement `new`. Manual arena allocations with placement new will likely cause crashes because the library manages and frees underlying buffers differently. This is unsafe and leads to undefined behaviors.
 
 ```c++
 Example* chunkPointer = static_cast<Example*>(::operator new(sizeof(Example) * cardinality));
-unsigned long long int i = 0;
+size_t i = 0;
 
 for (i = 0;i < cardinality;i++)
 {
@@ -247,7 +251,7 @@ for (i = 0;i < cardinality;i++)
 ```c++
 Example* pointer = ::new Example();
 void* pointer = reinterpret_cast<void*>(pointer);
-delete pointer; //This is very dangerous
+::delete pointer; //This is very dangerous
 ```
 
 - Finally, out-of-memory conditions must be handled by the application. Large managed instances should be recycled and repurposed when they are no longer needed; the same applies to chunks. Unlike Rust where the ownership system exists, the valid references or pointers to recycled instances will potentially be meaningless and can unexpectedly modify the repurposed instances.
